@@ -1,0 +1,146 @@
+import Head from "next/head";
+import { makeStyles } from "@mui/styles";
+import Layout from "../../components/Layout/Layout";
+import ChannelDetailCard from "../../components/community/Channel";
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import Paper from '@mui/material/Paper';
+
+const channels = ['933764998067544074','933765043382792303','933765077616705537','933765114463678556'];
+
+const Item = styled(Paper)(({ theme }) => ({
+    ...theme.typography.body2,
+    padding: theme.spacing(1),
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+  }));
+
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    background: "#0C091B",
+    width: "100%",
+    fontFamily: "'Inter', sans-serif",
+    display: "flex",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    color: "white",
+    backgroundImage: "url('/images/bg.png')",
+    backgroundRepeat: "no-repeat",
+    maxWidth: "100%",
+  },
+  container: {
+    margin: "2% 8%",
+    width: "100%",
+    [theme.breakpoints.down("md")]: {
+      margin: "2%",
+    },
+  },
+  desc: {
+    margin: "5% 0%",
+  },
+}));
+export async function getStaticProps() {
+  const { API_URL } = process.env;
+  let url = API_URL + "/api/artist-assets/1?populate=*";
+  let data;
+  try {
+    // const res = fetch(url);
+    const res = await fetch(
+      "https://admin.artistfirst.in/api/community-messages"
+    );
+    const data1 = await res.json();
+    data = data1.data;
+
+    var results = data.reduce(function(results, org) {
+      (results[org.attributes.channelId] = results[org.attributes.channelId] || []).push(org);
+      return results;
+  }, {})
+
+ //   console.log('results',results);
+    return {
+      props: {
+        data:results,
+        url,
+        API_URL: API_URL + "/api",
+      },
+      revalidate: 1,
+    };
+  } catch (error) {
+    // The  API most likely died
+    console.error(error);
+    return {
+      props: {
+        url,
+        API_URL: API_URL + "/api",
+        error: JSON.stringify(error),
+      },
+      revalidate: 1, // In seconds
+    };
+  }
+}
+
+const singer1 = {
+    name: "Kaka(Ravinder Singh)",
+    image: "https://sevencvod.s.llnwi.net/GhaintPunjab/kaka-punjabi-singer-ghaintpunjab.png",
+}; 
+
+const singer2 = {
+    name: "Jass Manak",
+    image: "https://pbs.twimg.com/profile_images/1360192675647868937/gifgx4fa_400x400.jpg",
+}; 
+
+
+const singer3 = {
+    name: "Neha Kakkar",
+    image: "https://cdn.siasat.com/wp-content/uploads/2021/06/neha.jpg",
+}; 
+
+const singer4 = {
+    name: "Jubin Nautiyal",
+    image: "https://1.bp.blogspot.com/-bpeRmP1gLE0/YJ1inbhHmhI/AAAAAAAAA4Q/POwM6Rl4GAw2ri-qkgSd0zYJCl06xDyrgCNcBGAsYHQ/s564/jubin%2B1.jpg",
+}; 
+
+
+
+
+export default function Home(props) {
+  console.log('props',props.data);
+  const classes = useStyles();
+  return (
+    <Layout>
+      <div className={classes.root}>
+        {/* <EllipsePatch className={classes.patch} /> */}
+        <Head>
+          <title>{props?.data?.attributes?.Title}</title>
+          <meta name="description" content={props?.data?.attributes?.Description} />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <div className={classes.container}>
+ 
+<Grid container spacing={2}>
+
+  <Grid item xs={4}>
+    <ChannelDetailCard data={singer1} data2 = {props.data[channels[0]]}/>
+  </Grid>
+
+  <Grid item xs={4}>
+    <ChannelDetailCard  data={singer2} data2 = {props.data[channels[1]]} />
+  </Grid>
+
+  <Grid item xs={4}>
+    <ChannelDetailCard data={singer3}  data2 = {props.data[channels[2]]} />
+  </Grid>
+
+  <Grid item xs={4}>
+    <ChannelDetailCard data={singer4} data2= { props.data[channels[3]]}/>
+  </Grid>
+
+</Grid>
+
+
+        </div>
+      </div>
+    </Layout>
+  );
+}
